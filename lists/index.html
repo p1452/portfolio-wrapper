@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#202124" />
+    <meta name="color-scheme" content="dark" />
+    <style>html,body{color:#eef0f4;--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark;background:#202124;margin:0}#root>p[role=status]{padding:24px;font:17px system-ui}</style>
+    <meta
+      name="description"
+      content="Your lists, ready even when you are offline."
+    />
+    <link rel="icon" href="/portfolio-wrapper/lists/icon.svg" type="image/svg+xml" />
+    <title>Lists</title>
+    <script type="module" crossorigin src="/portfolio-wrapper/lists/assets/index-Bt22LXtJ.js"></script>
+  <link rel="manifest" href="/portfolio-wrapper/lists/manifest.webmanifest"></head>
+  <body>
+    <div id="root"><p role="status">Opening Lists…</p></div>
+    <script>
+      // Also cover a missing entry module, before any application code runs.
+      setTimeout(() => {
+        const root = document.getElementById("root");
+        if (root.textContent !== "Opening Lists…") return;
+        const message = document.createElement("p");
+        message.setAttribute("role", "alert");
+        message.textContent = "Lists is still waiting for application files. Reload to retry. Your saved data has not been reset.";
+        const retry = document.createElement("button");
+        retry.textContent = "Retry opening Lists";
+        retry.onclick = () => location.reload();
+        root.replaceChildren(message, retry);
+      }, 12000);
+    </script>
+  </body>
+</html>
+
