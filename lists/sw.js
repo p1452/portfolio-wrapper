@@ -1,1 +1,19 @@
-if(!self.define){let e,s={};const i=(i,r)=>(i=new URL(i+".js",r).href,s[i]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=i,e.onload=s,document.head.appendChild(e)}else e=i,importScripts(i),s()}).then(()=>{let e=s[i];if(!e)throw new Error(`Module ${i} didn’t register its module`);return e}));self.define=(r,n)=>{const o=e||("document"in self?document.currentScript.src:"")||location.href;if(s[o])return;let l={};const t=e=>i(e,o),u={module:{uri:o},exports:l,require:t};s[o]=Promise.all(r.map(e=>u[e]||t(e))).then(e=>(n(...e),l))}}define(["./workbox-9c191d2f"],function(e){"use strict";self.addEventListener("message",e=>{e.data&&"SKIP_WAITING"===e.data.type&&self.skipWaiting()}),e.clientsClaim(),e.precacheAndRoute([{url:"recover.html",revision:"0f0de147914ff0831a636f56077723d9"},{url:"index.html",revision:"64a6db55b4215862d75de2fadc3df92b"},{url:"icon.svg",revision:"4a80b57fcaeab6dc816e84af4c6d8a73"},{url:"icon-512.png",revision:"535f59e997cf311ab210ebd2d9e0ebb4"},{url:"icon-192.png",revision:"76e42bf14348c6e03631a3260d8b4598"},{url:"assets/workbox-window.prod.es5-Bd17z0YL.js",revision:null},{url:"assets/virtual_pwa-register-CpR51yVy.js",revision:null},{url:"assets/targetedRecovery-Dw-9dge3.js",revision:null},{url:"assets/recover-DK9vIntO.js",revision:null},{url:"assets/modulepreload-polyfill-P2Xu9kJm.js",revision:null},{url:"assets/main-BjA1mUvD.js",revision:null},{url:"assets/main-BDIV-J0z.js",revision:null},{url:"assets/main-3PNQkc7X.css",revision:null},{url:"icon-192.png",revision:"76e42bf14348c6e03631a3260d8b4598"},{url:"icon-512.png",revision:"535f59e997cf311ab210ebd2d9e0ebb4"},{url:"icon.svg",revision:"4a80b57fcaeab6dc816e84af4c6d8a73"},{url:"manifest.webmanifest",revision:"901a1ccbec903439e844f03a8508f1c5"}],{}),e.cleanupOutdatedCaches(),e.registerRoute(new e.NavigationRoute(e.createHandlerBoundToURL("/portfolio-wrapper/lists/index.html")))});
+// Retired October 20, 2026. This worker never opens storage or calls a backend.
+// Retain this exact update endpoint for previously installed obsolete PWAs.
+const retiredScope = self.location.origin + "/portfolio-wrapper/lists/";
+const notice = "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Lists retired</title><body><h1>This Lists app is retired</h1><p>The current Lists app is hosted on the NUC.</p><p><a href=\"https://spero.pfeiffee.com:8124/lists/\">Open current Lists</a></p><p>Stored data on this old origin has not been cleared. Keep any unsynchronized data for recovery; opening the current app does not transfer it.</p></body></html>";
+self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
+self.addEventListener("activate", event => event.waitUntil((async () => {
+  if (self.registration.scope !== retiredScope) return;
+  await self.clients.claim();
+  const windows = await self.clients.matchAll({ type: "window" });
+  await Promise.allSettled(windows.filter(client => client.url.startsWith(retiredScope))
+    .map(client => client.navigate(client.url)));
+})()));
+self.addEventListener("fetch", event => {
+  if (self.registration.scope === retiredScope && event.request.mode === "navigate" &&
+      event.request.url.startsWith(retiredScope)) {
+    event.respondWith(Promise.resolve(new Response(notice, { status: 410,
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } })));
+  }
+});
