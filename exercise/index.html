@@ -1,0 +1,553 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Exercise</title>
+<meta name="theme-color" content="#edf5ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<script src="./connection.js"></script>
+  <meta charset="utf-8">
+  <style>
+    :root{
+      --bg:#101216;--panel:#181b20;--panel2:#20242a;--text:#f1f3f4;--muted:#9aa0a6;
+      --line:#343941;--green:#7ddc9c;--red:#ff8f86;--amber:#f0c36a;--blue:#8ab4f8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .app{max-width:1380px;margin:auto;padding:17px 13px 88px}
+    .top{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}
+    .brand{font-size:29px;font-weight:900}.sub{font-size:12px;color:var(--muted)}
+    .pane{display:none}.pane.active{display:block}
+    .section{font-size:14px;font-weight:850;margin:22px 2px 9px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .card,.box,.ex{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+    .label{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .value{font-size:29px;font-weight:900;margin:6px 0 2px}.unit{font-size:13px;color:var(--muted);font-weight:650}
+    .delta{font-size:13px;font-weight:850}.up{color:var(--green)}.down{color:var(--red)}.warn{color:var(--amber)}.neutral{color:var(--muted)}
+    .detail{border-top:1px solid var(--line);padding-top:8px;margin-top:9px;font-size:12px;color:var(--muted);line-height:1.45}
+    .strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .mini{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px;text-align:center}
+    .mini b{font-size:20px;display:block}.mini span{font-size:10px;color:var(--muted)}
+    .notice{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+    .scoreboard{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}.scorehead,.scorerow{display:grid;grid-template-columns:1.4fr .8fr .8fr .7fr;gap:8px;align-items:center;padding:10px 13px}.scorehead{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:850;border-bottom:1px solid var(--line)}.scorerow{border-bottom:1px solid #292e35}.scorerow:last-child{border:0}.scorelabel{font-weight:800}.scoreval{font-weight:850;text-align:right}.scorechange{text-align:right;font-weight:900}.trendgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.trendbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}.trendtitle{font-weight:850;margin-bottom:4px}.trendmeta{font-size:11px;color:var(--muted);margin-bottom:10px}.bars{height:120px;display:flex;gap:4px;align-items:end;border-bottom:1px solid var(--line);padding-top:8px}.bar{flex:1;min-width:5px;background:var(--blue);opacity:.72;border-radius:4px 4px 0 0;position:relative}.bar:hover{opacity:1}.legend{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:5px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}.groupbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px}.groupbox h3{font-size:13px;margin:0 0 9px}.metricline{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #292e35;font-size:12px}.metricline:last-child{border:0}.metricline span{color:var(--muted)}
+    .splitgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.splitcol{display:grid;gap:9px;align-content:start}.splithead{font-size:13px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:2px 2px 0}.ex{cursor:pointer}.exhead{display:flex;justify-content:space-between;gap:8px}.exname{font-weight:850}
+    .sets{font-size:12px;color:var(--muted);margin-top:6px}.exmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+    .exm{background:var(--panel2);border-radius:9px;padding:7px}.exm b{display:block}.exm span{font-size:9px;color:var(--muted)}
+    .exvolume{font-size:10px;color:var(--muted);margin-top:8px}
+    .sessionlist{display:none;margin-top:9px;border-top:1px solid var(--line);padding-top:7px}.sessionlist.open{display:block}
+    .sess{display:grid;grid-template-columns:72px 1fr 65px;gap:7px;padding:6px 0;border-bottom:1px solid #292e35;font-size:11px}.sess:last-child{border:0}
+    .tablebox{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);font-size:12px;text-align:right;white-space:nowrap}
+    th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--panel)}
+    th:first-child,td:first-child{text-align:left} tr:last-child td{border-bottom:0}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px}
+    .kpi b{font-size:21px;display:block}.kpi span{font-size:10px;color:var(--muted)}
+    .issue{display:grid;grid-template-columns:90px 105px 1fr;gap:10px;padding:11px;border-bottom:1px solid var(--line);font-size:12px}
+    details{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-top:10px;overflow:hidden}summary{cursor:pointer;padding:12px 14px;font-weight:850;color:var(--text)}details .tablebox{border:0;border-top:1px solid var(--line);border-radius:0}
+    .sev{font-weight:850}.High{color:var(--red)}.Medium{color:var(--amber)}.Low{color:var(--muted)}
+    .dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+    .vizcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;min-width:0}
+    .vizhead{display:flex;align-items:start;justify-content:space-between;gap:8px}
+    .viztitle{font-weight:850;font-size:15px}.viznumber{font-size:22px;font-weight:900;text-align:right}
+    .vizmeta{color:var(--muted);font-size:11px;line-height:1.45;margin:5px 0 9px}
+    .viznote{font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:8px;margin-top:9px}
+    .vizsvg{width:100%;height:105px;display:block}.vizlabels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
+    .headline{background:#19231e;border:1px solid #3c7151;border-radius:16px;padding:17px;line-height:1.5;font-size:15px;font-weight:750}
+    .barrow{display:grid;grid-template-columns:82px 1fr 55px;gap:8px;align-items:center;font-size:11px;margin:7px 0}
+    .bartrack{background:var(--panel2);border-radius:5px;height:13px;overflow:hidden}.barfill{height:100%;background:var(--blue);border-radius:5px}
+    .barrow b{text-align:right}.pill{border:1px solid var(--line);border-radius:20px;padding:4px 8px;font-size:10px;color:var(--muted)}
+    .auditrow{padding:11px;border-bottom:1px solid var(--line);font-size:12px;line-height:1.5}
+    .auditrow b{display:block;margin-bottom:3px}.auditrow:last-child{border:0}
+    .goalgrid{display:grid;grid-template-columns:1.3fr .7fr .7fr;gap:10px;margin-bottom:12px}
+    .goalhero,.goalmini{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fff}.goalhero b{font-size:28px;display:block}.goalhero .status{font-size:13px;font-weight:900;margin-top:5px}.goalmini b{font-size:22px;display:block}.goalmini span{font-size:10px;color:#53657b}
+    .progress{height:13px;background:#eaf2fc;border-radius:7px;overflow:hidden;margin:10px 0 5px}.progressfill{height:100%;background:#198065;border-radius:7px}.progressmeta{font-size:10px;color:#53657b;display:flex;justify-content:space-between;gap:10px}
+    .monthchartwrap{overflow-x:auto;padding-top:4px}.monthchart{height:205px;min-width:760px;position:relative;display:flex;gap:6px;align-items:end;border-bottom:1px solid #b9cbe0;padding:18px 7px 22px}.monthcol{height:100%;flex:1;min-width:30px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;position:relative}.monthstack{width:100%;min-height:1px;display:flex;flex-direction:column-reverse;border-radius:4px 4px 0 0;overflow:hidden;outline:1px solid #ffffff55}.monthcol.estimated .monthstack{opacity:.58}.monthcol.raw .monthstack{opacity:.98}.monthseg.strength{background:#4f78c7}.monthseg.cardio{background:#e29542}.monthseg.walking{background:#48a977}.monthseg.other{background:#8c70b6}.monthlabel{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:#53657b;white-space:nowrap}.targetline{position:absolute;left:0;right:0;border-top:2px dashed #bb2746;z-index:3;pointer-events:none}.targettag{position:absolute;right:6px;transform:translateY(-15px);font-size:9px;font-weight:850;color:#bb2746;background:#fff;padding:0 3px}.chartlegend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:#53657b;margin-top:8px}.legendswatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}.legendswatch.strength{background:#4f78c7}.legendswatch.cardio{background:#e29542}.legendswatch.walking{background:#48a977}.legendswatch.other{background:#8c70b6}.dashselect{font:inherit;border:1px solid #aac1db;border-radius:7px;padding:3px 6px;background:#fff;color:#112546;font-weight:800}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:#15181d;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:20}
+    .tabbar{width:min(1380px,100%);display:grid;grid-template-columns:repeat(5,1fr)}
+    .dashsection{border:1px solid var(--line);border-radius:15px;overflow:hidden;margin:12px 0;background:var(--panel)}
+    .dashband{padding:9px 14px;font-size:16px;font-weight:850;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .dashband.blue{background:#145ca3}.dashband.green{background:#198065}.dashband.gold{background:#80601b}.dashband.purple{background:#514493}
+    .dashbody{padding:11px}.latestgrid{display:grid;grid-template-columns:1.02fr 1.08fr .75fr;gap:10px}
+    .dashpanel{border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}.dashpanel h3{background:var(--panel2);font-size:13px;margin:0;padding:8px 10px}
+    .dashtable{min-width:0}.dashtable th,.dashtable td{padding:8px 7px;font-size:12px;white-space:normal}.dashtable th{font-size:10px}
+    .dashcompare{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.compcard{border:1px solid var(--line);border-radius:11px;overflow:hidden}.compcard h3{font-size:14px;margin:0;padding:9px 10px;background:var(--panel2)}
+    .compcard .dashtable td,.compcard .dashtable th{font-size:11px;padding:7px 5px}.compcard .dashtable td:first-child{font-weight:700}
+    .activityscroll{overflow-x:auto}.activitygrid{display:grid;grid-template-columns:110px repeat(28,minmax(32px,1fr));min-width:1050px;font-size:10px;text-align:center}
+    .activitygrid>div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 2px}.activitygrid .rowlabel{text-align:left;font-weight:750;padding-left:8px;position:sticky;left:0;background:var(--panel);z-index:1}.activitygrid .dayhead{font-weight:750;background:var(--panel2)}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%}.dot.upper{background:#fb667a}.dot.lower{background:#6196fd}.dot.aerobic{background:#ffa247}.dot.walk{background:#72d69c}.dot.rest{background:#78818d}
+    .dashtrends{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.dashtrend{border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0}.dashtrend h3{font-size:13px;margin:0 0 4px}
+    .dashnote{font-size:11px;color:var(--muted);line-height:1.45;margin:7px 0}.dashdetails{margin:9px 0 0;border-radius:9px}.dashdetails summary{padding:9px 11px;font-size:12px}
+    #dash{background:#f6f8fc;color:#112546;border-radius:16px;padding:10px 12px 18px;min-height:90vh}
+    #dash .top{padding:3px 5px}#dash .sub,#dash .dashnote{color:#53657b}
+    #dash .dashsection{background:#fff;border-color:#c8d8eb;box-shadow:0 1px 5px #17385b12}
+    #dash .dashpanel,#dash .compcard,#dash .dashtrend,#dash .dashdetails{background:#fff;border-color:#c8d8eb}
+    #dash .dashpanel h3,#dash .compcard h3,#dash .activitygrid .dayhead{background:#eaf2fc;color:#112546}
+    #dash .dashtable th{background:#eaf2fc;color:#263c5b;border-color:#c8d8eb}
+    #dash .dashtable td,#dash .activitygrid>div{border-color:#dbe5f0}
+    #dash .activitygrid .rowlabel{background:#fff}#dash .activitygrid .dayhead{background:#eaf2fc}
+    #dash .dashdetails summary{color:#112546}#dash .tablebox{background:#fff;border-color:#c8d8eb}
+    #dash .tablebox th{background:#eaf2fc;color:#263c5b}#dash .tablebox td{border-color:#dbe5f0}
+    #dash .vizlabels{color:#53657b}#dash .up{color:#078046}#dash .down{color:#bb2746}
+    button{border:0;background:transparent;color:var(--muted);padding:15px 3px 13px;font:inherit;font-weight:800;border-top:3px solid transparent}
+    button.active{color:var(--text);border-top-color:var(--text)}
+    .loading{padding:60px 20px;text-align:center;color:var(--muted)}
+    @media(max-width:900px){.latestgrid{grid-template-columns:1fr 1fr}.latestgrid .dashpanel:last-child{grid-column:1/-1}.dashcompare{grid-template-columns:1fr 1fr}.dashtrends{grid-template-columns:1fr 1fr}}
+    @media(max-width:720px){.goalgrid{grid-template-columns:1fr 1fr}.goalhero{grid-column:1/-1}.cards{grid-template-columns:1fr 1fr}.strip{grid-template-columns:repeat(3,1fr)}.splitgrid,.trendgrid,.twocol,.dashboard-grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.scorehead,.scorerow{grid-template-columns:1.25fr .75fr .75fr .65fr}}
+    @media(max-width:600px){.goalgrid{grid-template-columns:1fr}.goalhero{grid-column:auto}.latestgrid,.dashcompare,.dashtrends{grid-template-columns:1fr}.latestgrid .dashpanel:last-child{grid-column:auto}.dashband{font-size:14px;align-items:start;flex-direction:column;gap:3px}}
+    @media(max-width:430px){.cards{grid-template-columns:1fr}.brand{font-size:25px}}
+    @media(max-width:430px){.tabbar button{font-size:11px}}
+/* v9.13 exercise-comparison canonical set display; v9.12 Dash compaction preserved. */
+body:has(#dash.active){background:#edf5ff}
+.app:has(#dash.active){max-width:1820px;padding:4px 20px 65px}
+#dash{padding:0;background:transparent;color:#071f58;--upper:#ff3568;--lower:#2478ff;--cardio:#ff9500;--walking:#29b67b}
+#dash .top{margin-bottom:5px;padding:0 8px;min-height:36px;align-items:center}#dash .brand{font-size:30px;line-height:1.02}#dash .sub{font-size:11px;line-height:1.1}
+#dash .dashbuild{font:800 10px system-ui;color:#9aa0a6;background:#181b20;border:1px solid #343941;border-radius:8px;padding:4px 7px;white-space:nowrap;margin-right:1px}
+#dash .dashsection{margin:0;border-radius:10px;background:linear-gradient(110deg,#fff,#f7fbff);border-color:#cfdef0}
+#dash .dashband{height:34px;padding:5px 14px;font-size:16px;color:white;flex-direction:row;align-items:center;white-space:nowrap}
+#dash .dashband.blue{background:linear-gradient(#0789e7,#005eb6)}#dash .dashband.gold{background:linear-gradient(100deg,#b6903b,#8f621a)}#dash .dashband.purple{background:linear-gradient(#665dbb,#41338c)}
+#dash .dashbody{padding:8px 10px}
+#dash .dash-toprow{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-bottom:9px}
+#dash .dash-toprow>.dashsection{height:288px}
+#dash .progresslayout{display:grid;grid-template-columns:1.8fr 1fr;gap:10px}
+#dash .progressplot{min-width:0}#dash h3{font-size:14px;margin:0 0 3px}
+#dash .cumulativechart{width:100%;height:207px;display:block}#dash .axistext{font:11px Arial,sans-serif;fill:#244577}
+#dash .linelegend{display:flex;justify-content:center;gap:20px;font-size:11px;margin-top:-5px}
+#dash .monthlystats{background:#f0f6fd;border-radius:8px;overflow:hidden;align-self:start}
+#dash .monthlystat{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:8px 10px;border-bottom:1px solid #d5e2f2;font-size:12px}
+#dash .monthlystat b{font-size:22px;white-space:nowrap}#dash .monthlystat:nth-child(3) b{font-size:16px}
+#dash .pacestatus{margin:7px;padding:10px;border-radius:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;min-height:56px}
+#dash .pacestatus b{font-size:18px}#dash .pacestatus.ahead{background:#e2f5e8;color:#067326}#dash .pacestatus.behind{background:#fff0df;color:#975118}
+#dash .historylegend{display:flex;justify-content:space-around;font-size:10px;color:#244577;gap:5px;padding:2px 0 0}
+#dash .historychart{width:100%;height:228px;display:block}
+#dash .dash-secondrow{display:grid;grid-template-columns:2.32fr .8fr .8fr .68fr;gap:10px;margin-bottom:8px;align-items:stretch}
+#dash .compositionbox,#dash .latestcard{border:1px solid #cfdef0;border-radius:10px;background:linear-gradient(110deg,#fff,#f4f9ff);overflow:hidden;min-width:0;box-shadow:0 1px 5px #17385b0d}
+#dash .compositionbox{padding:7px 14px 8px}
+#dash .compositionhead{font-size:15px;font-weight:850;margin:0 0 5px}
+#dash .compositionrow{padding:3px 0}
+#dash .compositiontitle{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin-bottom:3px;align-items:end}#dash .compositiontitle b{font-size:12px}
+#dash .segments{display:flex;width:100%;height:24px;border-radius:5px;overflow:hidden;color:white;font-size:11px;font-weight:750;text-align:center}
+#dash .segments>div{display:flex;justify-content:center;align-items:center;min-width:0}
+#dash .compositionlegend{display:flex;justify-content:space-between;gap:6px;margin-top:5px;font-size:10px;line-height:1.12}
+#dash .compositionlegend>div{display:flex;gap:5px;min-width:0}#dash .compositionlegend i{width:10px;height:10px;border-radius:50%;margin-top:1px;flex-shrink:0}
+#dash .latestcard{padding:4px 8px 5px}#dash .latestcard h3{display:flex;justify-content:space-between;padding:5px 8px;border-radius:5px;margin:0 -4px 1px;font-size:15px}
+#dash .latestcard h3 span:last-child{font-size:12px;font-weight:400;color:#15366b}
+#dash .latestcard.upper h3{background:#fde8ef;color:#f12a61}#dash .latestcard.lower h3{background:#e4f0ff;color:#0065ef}
+#dash .latestmetric{display:grid;grid-template-columns:1.5fr .65fr .9fr;align-items:center;gap:5px;border-bottom:1px solid #d6e3f3;padding:7px 4px;font-size:11px}
+#dash .latestmetric:last-of-type{border-bottom:0}
+#dash .latestmetric span{display:block;font-size:10px;font-weight:400;line-height:1.25}#dash .latestmetric strong{font-size:16px;text-align:center}#dash .latestdelta{text-align:center}#dash .latestdelta b{font-size:16px}
+#dash .vizlabels{font-size:9px;gap:4px}
+#dash .dashdetails{margin:6px 0;border-radius:7px;background:linear-gradient(#fff,#eaf3fe);border-color:#ccddf1}
+#dash .dashdetails summary{font-size:14px;padding:6px 12px;line-height:19px}#dash .detailcontrols{display:flex;justify-content:space-between;padding:10px;font-size:12px}#dash .detailprovenance{font-size:12px;line-height:1.5;padding:10px 14px;background:#fff}
+#dash>.dashsection{margin-top:8px}#dash .activitygrid{grid-template-columns:125px repeat(var(--activity-days,31),minmax(28px,1fr));min-width:1030px;font-size:9px}#dash .activitygrid>div{padding:4px 1px;line-height:14px}#dash .activitygrid .rowlabel{font-size:12px;padding-left:5px;background:transparent}#dash .activitygrid .dayhead{background:#edf5ff}#dash .activityscroll{margin:-8px -10px 0}
+#dash .dot.upper{background:var(--upper)}#dash .dot.lower{background:var(--lower)}#dash .dot.aerobic{background:var(--cardio)}#dash .dot.walk{background:var(--walking);opacity:.85}#dash .dot{width:9px;height:9px}
+#dash .dashnote{font-size:10px;margin:5px 0 0;line-height:1.25}
+
+#dash .supportstatus{display:inline-flex;align-items:center;gap:6px;margin-right:10px;font-size:11px}
+#dash .supportpill{display:inline-block;border-radius:10px;padding:2px 7px;font-weight:850;background:#fff3d7;color:#6f4a00}
+#dash .supportpill.done{background:#dff5e8;color:#087a40}
+#dash .activityright{display:flex;align-items:center;justify-content:flex-end;gap:4px;white-space:nowrap}
+#dash .activityrange{font-weight:850}
+#dash .emptytrend{padding:20px 10px;color:#53657b;font-size:12px}
+#dash .compositionrow .emptytrend{padding:0;height:16px;line-height:16px}
+#dash .compositionbox:has(.emptytrend) .compositionrow{padding:1px 0}
+@media(max-width:1150px){#dash .dash-toprow{grid-template-columns:1fr}#dash .dash-toprow>.dashsection{height:auto}#dash .historychart{height:220px}#dash .dash-secondrow{grid-template-columns:1fr 1fr}#dash .compositionbox{grid-column:1/-1}}
+@media(max-width:700px){.app:has(#dash.active){padding:10px 8px 70px}#dash .brand{font-size:25px}#dash .progresslayout{grid-template-columns:1fr}#dash .monthlystats{display:grid;grid-template-columns:1fr 1fr}#dash .pacestatus{grid-column:1/-1}#dash .monthlystat{padding:7px}#dash .monthlystat b{font-size:19px}#dash .dashband{font-size:13px;padding:6px 8px;white-space:normal;height:auto;min-height:34px}#dash .dash-secondrow{gap:6px}#dash .latestmetric{grid-template-columns:1fr 1fr}#dash .latestdelta{grid-column:1/-1;text-align:right}#dash .latestmetric span{font-size:10px}#dash .latestmetric strong{font-size:15px}#dash .latestcard h3{font-size:13px;padding:6px 3px}#dash .latestcard h3 span:last-child{font-size:10px}#dash .compositionbox{padding:7px 10px}#dash .compositiontitle{font-size:10px}#dash .compositiontitle b{font-size:12px}#dash .compositionlegend{font-size:10px;flex-wrap:wrap;justify-content:flex-start;gap:10px}#dash .historylegend{font-size:8px}#dash .historychart{height:190px}#dash .dashdetails summary{font-size:12px}}
+
+
+#dash .compositionlegend>div{flex:1}
+#dash .compositionlegend span{white-space:nowrap}
+#dash .dashdetails:not([open])>:not(summary){display:none}
+#dash .dashdetails summary{list-style:none}
+#dash .dashdetails summary::before{content:'▸ ';margin-right:5px;color:#005eb6}
+#dash .dashdetails[open] summary::before{content:'▾ '}
+#dash .activitygrid>div{padding-top:2px;padding-bottom:2px}
+#dash .supportcard h3{background:#eee7f7;color:#76509b;font-size:15px;white-space:nowrap}
+#dash .latestmetric{height:46px}
+#dash .supportmetric{grid-template-columns:1fr auto}
+#dash .supportmetric strong{font-size:16px;color:#76509b}
+#dash .supportmetric strong.done{color:#087a40}
+#dash .dot.balance{background:#bd9cdb}
+#dash .dot.plank{background:#76509b}
+#dash .supportdots{display:inline-flex;align-items:center;justify-content:center;gap:3px;vertical-align:middle}
+#dash .supportdots .dot{flex-shrink:0}
+@media(max-width:700px){#dash .latestmetric{height:auto;min-height:46px}}
+#dash .supportreminder{font-size:10px;color:#53657b;padding:4px 4px 0;white-space:nowrap}
+@media(max-width:1150px){#dash .supportcard{grid-column:1/-1}}
+  .activitygrid{width:max-content!important;min-width:0!important}
+#dash .activitygrid .rowlabel{background:#fff}
+.tabs{padding-bottom:env(safe-area-inset-bottom)}
+</style>
+</head>
+<body>
+<script>
+window.addEventListener('error',function(e){
+  var c=document.getElementById('content');
+  if(c){c.innerHTML='<div style="margin:16px;padding:14px;background:#181b20;color:#ff8f86;border:1px solid #343941;border-radius:12px;font:14px system-ui"><b>JavaScript error</b><br>'+String(e.message||'Unknown error')+'<br><span style="color:#9aa0a6">line '+String(e.lineno||'?')+'</span></div>';}
+});
+window.addEventListener('unhandledrejection',function(e){
+  var c=document.getElementById('content');
+  if(c){c.innerHTML='<div style="margin:16px;padding:14px;background:#181b20;color:#ff8f86;border:1px solid #343941;border-radius:12px;font:14px system-ui"><b>Promise error</b><br>'+String((e.reason&&e.reason.message)||e.reason||'Unknown error')+'</div>';}
+});
+</script>
+<div id="dataStatus" role="status" style="padding:6px 12px;font:12px system-ui;color:#112546;background:#fff3d7">Dashboard: connecting to live source…</div>
+<div class="app">
+  <div id="content"></div>
+</div>
+<div class="tabs"><div class="tabbar">
+  <button class="active" data-tab="dash" onclick="showTab('dash',this)">Dash</button>
+  <button data-tab="trends" onclick="showTab('trends',this)">Trends</button>
+  <button data-tab="exercises" onclick="showTab('exercises',this)">Exercises</button>
+  <button data-tab="history" onclick="showTab('history',this)">History</button>
+  <button data-tab="data" onclick="showTab('data',this)">Data</button>
+</div></div>
+<script>
+let DATA={};
+let DASH_SPLIT="";
+const TAB_STATE={};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('content').innerHTML=
+    '<section id="dash" class="pane active">'+loadingPane('Dashboard')+'</section>'+ 
+    '<section id="trends" class="pane">'+loadingPane('Trends',true)+'</section>'+ 
+    '<section id="exercises" class="pane">'+loadingPane('Exercises',true)+'</section>'+ 
+    '<section id="history" class="pane">'+loadingPane('History',true)+'</section>'+ 
+    '<section id="data" class="pane">'+loadingPane('Data',true)+'</section>';
+  loadTab('dash');
+});
+
+function loadingPane(label,defer=false){
+  return '<div class="top"><div><div class="brand">Exercise</div><div class="sub">Exercise DB</div></div></div>'+
+    (defer?'':'<div class="loading">Loading '+esc(label)+'…</div>');
+}
+
+const DASH_CACHE_KEY='exercise-dashboard:snapshot:v1';
+let DASH_SNAPSHOT=null;
+function validDash(d){return !!(d && Array.isArray(d.recent) && Array.isArray(d.activityDays) && d.generatedAt && d.monthlyGoal && d.activityDays.every(day=>/^\d{4}-\d{2}-\d{2}$/.test(day.date)))}
+function dashStatus(message){document.getElementById('dataStatus').textContent='Dashboard: '+message}
+function savedStatus(message){dashStatus('Saved snapshot · data generated '+(DASH_SNAPSHOT?.data.generatedAt||'unknown')+' · '+message)}
+function restoreDash(){
+  try {
+    const saved=JSON.parse(localStorage.getItem(DASH_CACHE_KEY));
+    if(!saved || saved.schema!==1 || !validDash(saved.data) || !Number.isFinite(saved.savedAt) || saved.savedAt>Date.now()+60000) return false;
+    const before=DATA; DATA=Object.assign({},DATA,saved.data);
+    try {document.getElementById('dash').innerHTML=renderDash()} catch(e){DATA=before;return false}
+    DASH_SNAPSHOT=saved;
+    savedStatus('refreshing…'); setupActivity(); return true;
+  } catch(e){return false}
+}
+function setupActivity(){
+  const scroller=document.querySelector('#dash .activityscroll'), grid=scroller?.querySelector('.activitygrid');
+  if(!grid) return;
+  const position=()=>{
+    if(!scroller.clientWidth) return;
+    const width=Math.max(28,(scroller.clientWidth-125)/7);
+    grid.style.gridTemplateColumns='125px repeat('+Math.max(1,(DATA.activityDays||[]).length)+','+width+'px)';
+    scroller.scrollLeft=scroller.scrollWidth-scroller.clientWidth;
+  };
+  requestAnimationFrame(position);
+  if(typeof ResizeObserver!=='undefined') {window.activityObserver?.disconnect();window.activityObserver=new ResizeObserver(position);window.activityObserver.observe(scroller)}
+}
+function loadTab(id,force=false){
+  if(TAB_STATE[id]==='loading' || (!force && TAB_STATE[id]==='loaded')) return;
+  TAB_STATE[id]='loading';
+  const pane=document.getElementById(id);
+  if(id==='dash'){
+    if(!DASH_SNAPSHOT) restoreDash();
+    if(DASH_SNAPSHOT) savedStatus('refreshing…');
+  }
+  if(pane && !(id==='dash' && DASH_SNAPSHOT)) pane.innerHTML=loadingPane(id.charAt(0).toUpperCase()+id.slice(1));
+  const fail=e=>{
+    TAB_STATE[id]='error';
+    if(id==='dash' && DASH_SNAPSHOT){savedStatus('live refresh failed; saved data may be out of date');return}
+    if(id==='dash') dashStatus('Live data unavailable; no saved snapshot');
+    if(pane) pane.innerHTML='<div class="notice">Load error: '+esc(e.message||e)+'. <button onclick="loadTab(\''+id+'\',true)">Retry</button></div>';
+  };
+  google.script.run.withSuccessHandler(d=>{
+    if(id==='dash' && !validDash(d)){fail(new Error('Invalid dashboard response'));return}
+    const previous=DATA; DATA=Object.assign({},DATA,d||{});
+    try{
+      const renderers={dash:renderDash,trends:renderTrends,exercises:renderExercises,history:renderHistory,data:renderData};
+      const rendered=renderers[id]();
+      if(pane) pane.innerHTML=rendered;
+    }catch(e){DATA=previous;fail(e);return}
+    TAB_STATE[id]='loaded';
+    if(id==='dash'){
+      DASH_SNAPSHOT={schema:1,savedAt:Date.now(),data:d};
+      let stored=true;try{localStorage.setItem(DASH_CACHE_KEY,JSON.stringify(DASH_SNAPSHOT))}catch(e){stored=false}
+      dashStatus('Live refresh succeeded · data generated '+d.generatedAt+(stored?'':' · saving unavailable on this device'));
+      setupActivity();
+    }
+  }).withFailureHandler(fail).getTabData(id);
+}
+window.addEventListener('online',()=>loadTab('dash',true));
+window.addEventListener('offline',()=>{if(DASH_SNAPSHOT)savedStatus('offline; saved data may be out of date')});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadTab('dash',true)});
+setInterval(()=>{if(!document.hidden)loadTab('dash',true)},300000);
+
+function metric(name){ return (DATA.recent||[]).find(x=>String(x.Metric)===name)||{}; }
+function fmt(n,d=1){if(n===''||n==null)return '—';const x=Number(n);return Number.isFinite(x)?x.toLocaleString(undefined,{maximumFractionDigits:d}):String(n)}
+function deltaClass(v){const n=Number(v);return !Number.isFinite(n)?'neutral':n>0?'up':n<0?'down':'neutral'}
+function deltaText(v){const n=Number(v);return !Number.isFinite(n)?'':(n>0?'↑ ':'↓ ')+Math.abs(n).toFixed(1)+'%'}
+function pageHeader(){return '<div class="top"><div><div class="brand">Exercise Dashboard</div><div class="sub">Exercise DB v9.15 · data generated '+esc(DATA.generatedAt||'')+'</div></div><div class="dashbuild">v9.15</div></div>'}
+
+const DASH_COLORS={upper:'#ff3568',lower:'#2478ff',cardio:'#ff9500',walking:'#29b67b',other:'#9870bd'};
+function dashDate(v){return v?new Date(v+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}):'—'}
+function dashSection(tone,title,right,body){return `<section class="dashsection"><div class="dashband ${tone}"><span>${title}</span><span>${right||''}</span></div><div class="dashbody">${body}</div></section>`}
+function dashLine(points,field,color,height=64){
+  const known=points.filter(p=>p[field]!=null&&Number.isFinite(Number(p[field])));
+  if(!known.length)return '<div class="emptytrend">No complete observations</div>';
+  const max=Math.max(1,...known.map(p=>Number(p[field])))*1.12,w=320,h=height,pad=30;
+  const xy=points.map((p,i)=>p[field]==null?null:[pad+i*(w-pad-8)/Math.max(1,points.length-1),h-13-Number(p[field])/max*(h-22)]);
+  return `<svg class="dashspark" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(field)} trend: ${points.map(p=>p[field]==null?'unavailable':fmt(p[field],1)).join(', ')}"><path d="M${pad} 5V${h-13}H${w-8}" fill="none" stroke="#b5cbe6"/>${[0,.5,1].map(f=>`<text x="${pad-4}" y="${h-10-f*(h-22)}" text-anchor="end" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${fmt(max*f,0)}</text>`).join('')}${xy.slice(1).map((p,i)=>p&&xy[i]?`<path d="M${xy[i].join(' ')}L${p.join(' ')}" fill="none" stroke="${color}" stroke-width="2"/>`:'').join('')}${xy.map((p,i)=>p?`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${color}"><title>${esc(dashDate(points[i].date))}: ${fmt(points[i][field],1)}</title></circle>`:'').join('')}</svg>`;
+}
+function monthlyLine(g){
+  if(!g.asOf)return '<div class="emptytrend">No authoritative activity recorded this month</div>';
+  const w=540,h=222,left=48,right=15,top=20,bottom=35,plotH=h-top-bottom;
+  const max=Math.ceil(Math.max(g.target,g.current.total||0)/1000)*1000;
+  const x=d=>left+d/g.daysInMonth*(w-left-right),y=v=>h-bottom-v/max*plotH;
+  const path=g.cumulative.map((p,i)=>(i?'L':'M')+x(p.day)+','+y(p.total)).join(' ');
+  const ticks=[0,5,10,15,20,25,g.daysInMonth].filter((d,i,a)=>d<=g.daysInMonth&&a.indexOf(d)===i);
+  return `<svg class="cumulativechart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Cumulative month-to-date EWP through ${esc(g.asOf)}; actual ${fmt(g.current.total,1)}, target ${fmt(g.paceTarget,1)}"><g>${[0,1,2,3,4,5].map(i=>`<path d="M${left} ${y(max*i/5)}H${w-right}" stroke="#dfebf6"/><text x="${left-8}" y="${y(max*i/5)+4}" text-anchor="end" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${fmt(max*i/5,0)}</text>`).join('')}${ticks.map(d=>`<path d="M${x(d)} ${top}V${h-bottom}" stroke="#edf3f9"/><text x="${x(d)}" y="${h-17}" text-anchor="middle" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${d===0?'1':d}</text>`).join('')}</g><path d="M${left} ${y(0)}L${x(g.daysInMonth)} ${y(g.target)}" stroke="#24ae69" stroke-width="2" stroke-dasharray="6 4" fill="none"/><path d="${path}" stroke="#2478ff" stroke-width="2.5" fill="none"/>${g.cumulative.map(p=>`<circle cx="${x(p.day)}" cy="${y(p.total)}" r="3" fill="#2478ff"><title>Day ${p.day}: ${fmt(p.total,1)} EWP</title></circle>`).join('')}<text x="${Math.min(w-right,x(g.elapsedDays))}" y="${Math.max(14,y(g.current.total)-9)}" text-anchor="end" fill="#2478ff" font-weight="800" font-size="14">${fmt(g.current.total,0)}</text><text x="${w-right}" y="${y(g.target)-6}" text-anchor="end" fill="#119747" font-weight="800" font-size="12">${fmt(g.target,0)}</text></svg><div class="linelegend"><span style="color:#2478ff">● Actual MTD EWP</span><span style="color:#119747">– – Target cumulative EWP</span></div>`;
+}
+function monthlyHistory(g){
+  const w=700,h=239,left=44,right=12,bottom=40,top=23,plot=h-bottom-top;
+  // Projection is a display-only addition; history totals remain actual EWP.
+  const projected=m=>m.month===g.current.month && m.total!=null && g.projected!=null;
+  const barTotal=m=>projected(m)?g.projected:m.total;
+  const max=Math.ceil(Math.max(g.target,...g.history.map(m=>Number(barTotal(m))||0))*1.08/1000)*1000;
+  const y=v=>h-bottom-v/max*plot,step=(w-left-right)/18;
+  const bars=g.history.map((m,i)=>{
+    const x=left+i*step+3,width=step-6,total=barTotal(m);
+    const label=new Date(m.month+'-15T12:00:00Z').toLocaleDateString('en-US',{month:'short',timeZone:'UTC'});
+    const remainder=projected(m)?Math.max(0,g.projected-m.total):0;
+    const title=projected(m)
+      ? esc(monthLabel(m.month))+': actual '+fmt(m.total,1)+' EWP · projected remaining '+fmt(remainder,1)+' EWP · projected month-end '+fmt(g.projected,1)+' EWP'
+      : esc(monthLabel(m.month))+': '+fmt(m.total,1)+' EWP · '+esc(m.basis)+' · '+esc(m.source||'authoritative current raw data');
+    const bar=m.total==null
+      ? `<text x="${x+step/2-3}" y="${h-bottom-7}" text-anchor="middle" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">—</text>`
+      : `<rect class="historyactual" x="${x}" y="${y(m.total)}" width="${width}" height="${Math.max(0,m.total/max*plot)}" rx="2" fill="${m.basis==='estimated'?'url(#estimatedHatch)':'#2478ff'}"/>${remainder>0?`<rect class="historyprojected" x="${x}" y="${y(total)}" width="${width}" height="${remainder/max*plot}" fill="url(#projectedHatch)"/>`:''}<text x="${x+step/2-3}" y="${y(total)-5}" text-anchor="middle" font-size="10" fill="#153468">${fmt(total,0)}</text>`;
+    return `<g class="historymonth" data-month="${m.month}"><title>${title}</title>${bar}<text x="${x+step/2-3}" y="${h-bottom+16}" text-anchor="middle" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${label}</text><text x="${x+step/2-3}" y="${h-bottom+29}" text-anchor="middle" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${m.month.slice(0,4)}</text></g>`;
+  }).join('');
+  return `<div class="historylegend"><span>▧ Estimated legacy/proxy</span><span>■ Measured/current program</span><span>▨ Projected remainder</span><span>– – Target ${fmt(g.target,0)}</span></div><svg class="historychart" viewBox="0 0 ${w} ${h}" role="img" aria-label="18-month total EWP history with ${fmt(g.target,0)} monthly target; current month shows actual plus projected remainder"><defs><pattern id="estimatedHatch" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#e3efff"/><path d="M-1 1L1-1M0 4L4 0M3 5L5 3" stroke="#82b5ff" stroke-width="1"/></pattern><pattern id="projectedHatch" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#d9e8ff"/><path d="M-1 1L1-1M0 6L6 0M5 7L7 5" stroke="#2478ff" stroke-width="1"/></pattern></defs>${[0,1,2,3,4,5,6].map(i=>`<path d="M${left} ${y(max*i/6)}H${w-right}" stroke="#e1ebf7"/><text x="${left-6}" y="${y(max*i/6)+4}" text-anchor="end" class="axistext" font-size="10" fill="#244577" font-family="Arial,sans-serif">${fmt(max*i/6,0)}</text>`).join('')}<path class="historytarget" d="M${left} ${y(g.target)}H${w-right}" stroke="#6b80af" stroke-width="1.5" stroke-dasharray="8 5"/>${bars}</svg>`;
+}
+function renderMonthlyGoal(){
+  const g=DATA.monthlyGoal||{};if(!g.current)return '';
+  const ahead=g.ahead,positive=ahead!=null&&ahead>=0;
+  const stat=(name,value,cls='')=>`<div class="monthlystat"><span>${name}</span><b class="${cls}">${value}</b></div>`;
+  const left=dashSection('blue','▥ 1. Monthly Progress',esc(monthLabel(g.current.month)),`<div class="progresslayout"><div class="progressplot"><h3>Cumulative EWP · ${esc(monthLabel(g.current.month))}</h3>${monthlyLine(g)}</div><div class="monthlystats">${stat('MTD EWP · through '+dashDate(g.asOf),fmt(g.current.total,0))}${stat('Target by '+dashDate(g.asOf),fmt(g.paceTarget,0))}${stat('Ahead / Behind',ahead==null?'—':`${ahead>=0?'+':''}${fmt(ahead,0)} (${signed(g.aheadPct)})`,positive?'up':'down')}${stat('Projected month-end',fmt(g.projected,0))}</div></div>`);
+  return `<div class="dash-toprow">${left}${dashSection('blue','18-Month Monthly EWP History','',monthlyHistory(g))}</div>`;
+}
+function compositionRow(m,label,showLegend){
+  if(!m)return '';
+  const categories=[['upper','Upper'],['lower','Lower'],['cardio','Cardio'],['walking','Walking'],['other','Support']];
+  const tooltip=k=>k==='other'?(m.otherDetail||m.otherLabel||'Recorded support EWP'):`${m.month} ${k}: ${fmt(m[k],1)} EWP`;
+  const legend=showLegend?`<div class="compositionlegend">${categories.map(([k,name])=>`<div title="${esc(tooltip(k))}"><i style="background:${DASH_COLORS[k]}"></i><span><b>${name}</b><br>${fmt(k==='other'?(Number(m[k])||0):m[k],0)} EWP</span></div>`).join('')}</div>`:'';
+  if(m.total==null)return `<div class="compositionrow"><div class="compositiontitle"><b>${label}</b><span>${esc(monthLabel(m.month))} · —</span></div><div class="emptytrend">No data</div>${legend}</div>`;
+  return `<div class="compositionrow"><div class="compositiontitle"><b>${label}</b><span>${esc(monthLabel(m.month))} · ${fmt(m.total,0)} EWP</span></div><div class="segments">${categories.map(([k])=>Number(m[k])>0?`<div style="width:${Math.max(0,Number(m[k])/Math.max(1,m.total)*100)}%;background:${DASH_COLORS[k]}" title="${esc(tooltip(k))}">${Math.round(Number(m[k])/m.total*100)}%</div>`:'').join('')}</div>${legend}${m.unreconciled?`<div class="dashnote down">Difference ${fmt(m.unreconciled,1)} remains unassigned.</div>`:''}</div>`;
+}
+function compositionPair(current,prior){
+  return `<div class="compositionhead">Last Month and Current Month Composition</div>${compositionRow(prior,'Last Month',false)}${compositionRow(current,'Current Month',true)}`;
+}
+function latestCard(split,label){
+  const l=DATA.latestWorkouts?.[split],key=split==='Upper'?'upper':'lower';
+  if(!l)return `<article class="latestcard ${key}"><h3>Latest ${label}</h3><p>No recorded workout</p></article>`;
+  const c=l.current;
+  const row=(name,value,avg,change,d)=>`<div class="latestmetric"><div><b>${name}</b><span>(prior ${l.previous.length} avg: ${fmt(avg,d)})</span></div><strong>${fmt(value,d)}</strong><div class="latestdelta ${change==null?'':deltaClass(change)}"><b>${change==null?'—':signed(change)}</b><span>vs prior ${l.previous.length} avg</span></div></div>`;
+  return `<article class="latestcard ${key}"><h3><span>▮ Latest ${label}</span><span>${dashDate(c.date)}</span></h3>${row('Strength EWP',c.ewp,l.ewpAvg,l.ewpChange,1)}${row('Volume (lb·reps)',c.volume,l.volumeAvg,l.volumeChange,0)}${c.ewp==null?'<div class="dashnote down">Incomplete sets · performance unavailable</div>':''}</article>`;
+}
+function dashExerciseDetail(selected){
+  const l=DATA.latestWorkouts?.[selected];
+  const selector=`<label>View: <select aria-label="Exercise comparison split" class="dashselect" onchange="setDashSplit(this.value)"><option value="Upper" ${selected==='Upper'?'selected':''}>Upper</option><option value="Leg" ${selected==='Leg'?'selected':''}>Lower</option></select></label>`;
+  if(!l)return selector+'<p>No workout recorded</p>';
+  const workouts=[l.current,...l.previous];
+  return `<div class="detailcontrols">${selector}<span>${esc(l.current.completeness)} · ${l.current.recordedSets} / ${l.current.expectedSets} sets</span></div><div class="tablebox"><table><thead><tr><th>Exercise</th>${workouts.map((p,i)=>`<th>${i===0?'Latest · ':''}${dashDate(p.date)}</th>`).join('')}</tr></thead><tbody>${l.current.exercises.map(e=>`<tr><td>${esc(e.name)}</td>${workouts.map(p=>{const x=p.exercises.find(a=>a.id===e.id);return `<td>${x?esc(x.sets.map(s=>s.text).join(' · '))+'<br>'+fmt(x.ewp,1)+' EWP · '+fmt(x.volume,0)+' vol':'—'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div><div class="detailprovenance">${workouts.map(p=>`<div><b>${dashDate(p.date)}</b> · ${fmt(p.ewp,1)} EWP · ${fmt(p.volume,0)} volume · ${esc(p.provenance||'Authoritative Workouts and Strength_Sets')}</div>`).join('')}${l.skippedIncomplete.length?'<div>Incomplete prior occurrences excluded from performance: '+l.skippedIncomplete.map(dashDate).join(', ')+'</div>':''}</div>`;
+}
+function dashReference(){
+  const rows=DATA.ewpReference||[],cov=DATA.rawCoverage||{};
+  return `<div class="detailprovenance">Strength set EWP = weight × repetitions ÷ established exercise divisor. Mixed-load segments are added. Cardio = machine calories × 0.60. Walking = non-treadmill Pixel miles × 14. Plank = minutes × 6.25.</div><div class="tablebox"><table><thead><tr><th>Exercise</th><th>Split</th><th>EWP divisor</th><th>Source notes</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.Exercise_Name)}</td><td>${r.Split==='Leg'?'Lower':esc(r.Split)}</td><td>${fmt(r.EWP_Divisor,0)}</td><td>${esc(r.Notes||'')}</td></tr>`).join('')}</tbody></table></div><div class="detailprovenance"><b>Coverage and provenance</b><p>${cov.performanceCurrent||0}/${cov.strengthCurrent||0} current and ${cov.performancePrior||0}/${cov.strengthPrior||0} prior workouts have complete sets.</p><p>Strength evidence without a raw Workouts row: ${[...(cov.strengthGapsCurrent||[]),...(cov.strengthGapsPrior||[])].map(dashDate).join(', ')||'none in these windows'}. Excluded from workout counts and performance.</p><p>Incomplete occurrences: ${[...(cov.incompleteCurrent||[]),...(cov.incompletePrior||[])].map(r=>dashDate(r.date)).join(', ')||'none in these windows'}.</p><p>${esc(DATA.monthlyGoal?.prior?.otherDetail||'')} Historical monthly totals are preserved as stored. Current totals include known complete-set strength, recorded cardio, and non-treadmill Pixel walking; missing coverage remains partial.</p><b>28 days vs prior 28 days · retained audit</b></div><div class="tablebox"><table><thead><tr><th>Metric</th><th>Current 28d</th><th>Prior 28d</th><th>Change %</th><th>Coverage / notes</th></tr></thead><tbody>${(DATA.recent||[]).map(m=>`<tr><td>${esc(m.Metric)}</td><td>${fmt(m.Current_28d,1)}</td><td>${fmt(m.Prior_28d,1)}</td><td>${m.Change_Pct==null?'—':signed(m.Change_Pct)}</td><td>${esc(m.Coverage||'')} · ${esc(m.Notes||'')}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function supportCard(){
+  const s=DATA.supportStatus||{}, b=s.balance||{count:0,target:3,complete:false}, p=s.plank||{count:0,target:2,complete:false};
+  const row=(name,x,target)=>`<div class="latestmetric supportmetric"><div><b>${name}</b></div><strong class="${x.complete?'done':''}">${fmt(x.count,0)} / ${fmt(x.target||target,0)}</strong></div>`;
+  return `<article class="latestcard supportcard"><h3>This Week Support</h3>${row('Balance',b,3)}${row('Plank',p,2)}<div class="supportreminder">Weekly targets: 3 balance · 2 plank</div></article>`;
+}
+
+function supportDayCell(d){
+  const activities=[d.balance?'Balance':null,d.plank?'Plank':null].filter(Boolean);
+  const title=d.date+': '+(activities.length?activities.join(' + '):'No completed support activity');
+  return `<div title="${esc(title)}" aria-label="${esc(title)}">${activities.length?`<span class="supportdots">${d.balance?'<span class="dot balance"></span>':''}${d.plank?'<span class="dot plank"></span>':''}</span>`:'&nbsp;'}</div>`;
+}
+
+function renderDash(){
+  const g=DATA.monthlyGoal||{},days=DATA.activityDays||[];
+  const selected=DASH_SPLIT==='Upper'?'Upper':'Leg';
+  const second=`<div class="dash-secondrow"><section class="compositionbox">${compositionPair(g.current,g.prior)}</section>${latestCard('Upper','Upper')}${latestCard('Leg','Lower')}${supportCard()}</div>`;
+  const detail=`<details id="exerciseDetail" class="dashdetails"><summary>Exercise-by-exercise comparison</summary>${dashExerciseDetail(selected)}</details><details class="dashdetails" id="ewpReference"><summary>EWP Calculation Reference by Exercise</summary>${dashReference()}</details>`;
+  const rows=[['Upper strength','upper'],['Lower strength','lower'],['Aerobic (TM/Rec)','aerobic'],['Walking (Pixel)','walk'],['Support','support']];
+  const activityRight=`<span class="activityright"><span class="activityrange">${dashDate(days[0]?.date)} – ${dashDate(days.at(-1)?.date)}</span></span>`;
+  const activity=dashSection('gold','▦ Recent Activity · Daily View',activityRight,`<div class="activityscroll"><div class="activitygrid" style="grid-template-columns:125px repeat(${Math.max(1,days.length)},minmax(28px,1fr))"><div class="rowlabel"></div>${days.map(d=>`<div class="dayhead">${dashDate(d.date)}</div>`).join('')}${rows.map(([label,key])=>`<div class="rowlabel">${label}</div>${days.map(d=>{if(key==='support')return supportDayCell(d);const on=key==='walk'?d.walking!=null&&d.walking>0:d[key];return `<div title="${esc(d.date+': '+label+(key==='walk'?' · '+fmt(d.walking,2)+' non-treadmill miles':on?' recorded':' none recorded'))}">${on?`<span class="dot ${key}"></span>`:'&nbsp;'}</div>`}).join('')}`).join('')}</div></div><div class="dashnote">Dots indicate recorded activity. Walking uses positive non-treadmill Pixel miles; missing readings remain unknown. Strength occurrences come only from Workouts. Support: light purple = Balance; dark purple = Plank.</div>`);
+  return pageHeader()+renderMonthlyGoal()+second+activity+detail;
+}
+
+function vizCard(title,value,meta,chart,left,right,note){return `<div class="vizcard"><div class="vizhead"><div class="viztitle">${esc(title)}</div><div class="viznumber">${value}</div></div><div class="vizmeta">${meta}</div>${chart}<div class="vizlabels"><span>${esc(left)}</span><span>${esc(right)}</span></div><div class="viznote">${note}</div></div>`}
+function signed(n){return (Number(n)>=0?'+':'')+fmt(n,1)+'%'}
+function daysInMonth(v){const m=String(v||'').match(/^(\d{4})-(\d{2})$/);return m?new Date(Number(m[1]),Number(m[2]),0).getDate():30}
+function spark(points,field){
+  if(!points||!points.length)return '<div class="loading" style="padding:20px">No comparable data</div>';
+  const nums=points.map(x=>x[field]==null?null:Number(x[field]));const known=nums.filter(Number.isFinite);if(!known.length)return '<div class="loading" style="padding:20px">No observed data</div>';const lo=Math.min(...known),hi=Math.max(...known);
+  const xy=nums.map((v,i)=>v==null?null:[18+i*324/Math.max(1,nums.length-1),82-(v-lo)/Math.max(hi-lo,1)*62]);
+  return `<svg class="vizsvg" viewBox="0 0 360 100" role="img" aria-label="Trend: ${nums.map(v=>v==null?'unknown':fmt(v,1)).join(', ')}"><path d="M18 84H342" stroke="#343941" fill="none"/>${xy.slice(1).map((p,i)=>p&&xy[i]?`<path d="M${xy[i].join(' ')} L${p.join(' ')}" fill="none" stroke="#8ab4f8" stroke-width="3"/>`:'').join('')}${xy.map(p=>p?`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#7ddc9c"/>`:'').join('')}</svg>`;
+}
+
+function renderTrends(){
+  const months=(DATA.monthly||[]).slice(-12);
+  const perf=DATA.performance||{};
+  const strength=(title,x)=>vizCard(title,
+    x.recentAvg==null?'—':fmt(x.recentAvg,1)+' EWP',
+    'Fixed core · first '+(x.compareCount||'—')+' vs latest '+(x.compareCount||'—')+' complete workouts: '+(x.changePct==null?'insufficient data':signed(x.changePct)),
+    spark(x.points||[],'ewp'),x.points?.[0]?.date||'',x.points?.at(-1)?.date||'',
+    `${x.coreCount||0} unchanged exercises; ${x.excluded||0} partial workout(s) excluded. New exercises do not enter this series.`);
+  const chart=(title,field,unit)=>{
+    const vals=months.map(x=>x[field]==null?null:Number(x[field]));const max=Math.max(1,...vals.filter(Number.isFinite));
+    const bars=months.map((x,i)=>`<div class="bar" title="${esc(monthLabel(x.Month))}: ${vals[i]==null?'unknown':fmt(vals[i],0)+' '+unit}" style="height:${vals[i]==null?0:Math.max(2,(vals[i]/max)*100)}%"></div>`).join('');
+    return `<div class="trendbox"><div class="trendtitle">${title}</div><div class="trendmeta">Last 12 available months · ${unit}</div><div class="bars">${bars}</div><div class="legend"><span>${months.length?esc(monthLabel(months[0].Month)):''}</span><span>${months.length?esc(monthLabel(months[months.length-1].Month)):''}</span></div></div>`;
+  };
+  const ewpPoints=months.map(x=>({date:monthLabel(x.Month),ewp:x.Historical_Strength_EWP==null?null:Number(x.Historical_Strength_EWP),basis:x.EWP_Basis}));
+  const ewpLine=()=>{
+    const known=ewpPoints.filter(p=>p.ewp!=null);if(!known.length)return '<div class="loading">No estimated values</div>';
+    const min=Math.min(...known.map(p=>p.ewp)),max=Math.max(...known.map(p=>p.ewp));
+    const xy=ewpPoints.map((p,i)=>p.ewp==null?null:[18+i*324/Math.max(1,ewpPoints.length-1),82-(p.ewp-min)/Math.max(1,max-min)*62]);
+    const parts=xy.slice(1).map((point,i)=>point&&xy[i]?`<path d="M${xy[i].join(' ')} L${point.join(' ')}" stroke="${ewpPoints[i+1].basis==='measured'&&ewpPoints[i].basis==='measured'?'#7ddc9c':'#8ab4f8'}" stroke-width="3" ${ewpPoints[i+1].basis==='measured'&&ewpPoints[i].basis==='measured'?'':'stroke-dasharray="5 5"'} fill="none"/>`:'').join('');
+    const dots=xy.map((point,i)=>point?`<circle cx="${point[0]}" cy="${point[1]}" r="4" fill="${ewpPoints[i].basis==='measured'?'#7ddc9c':'#8ab4f8'}"/>`:'').join('');
+    return `<div class="trendbox"><div class="trendtitle">Strength EWP</div><div class="trendmeta">Approximate older effort · exact modern records</div><svg class="vizsvg" viewBox="0 0 360 100" role="img" aria-label="Estimated historical strength EWP dashed, measured solid">${parts}${dots}</svg><div class="legend"><span>${esc(ewpPoints[0]?.date||'')}</span><span>${esc(ewpPoints.at(-1)?.date||'')}</span></div><div class="viznote">Dashed blue: estimated · solid green: measured · blank: unknown.</div></div>`;
+  };
+  return pageHeader()+`<div class="sub">Comparable capability first; program volume and activity below. Exact set data currently covers only part of a 90-day window.</div>
+    <div class="section">Like-for-like strength performance</div>
+    <div class="dashboard-grid">${strength('Upper core',perf.Upper||{})}${strength('Lower core',perf.Leg||{})}</div>
+    <div class="notice">The fixed core and three-set rule keep program changes from creating false strength changes. If a core machine is retired, this series pauses until explicitly rebased. All exercises still count toward workload.</div>
+    <div class="section">Activity & workload</div><div class="trendgrid">
+      ${chart('Walking','Walking_Miles','miles')}
+      ${chart('Exercise occurrences','Known_Exercise_Occurrences','occurrences')}
+      ${chart('Set equivalents','Set_Equivalent','approximate sets')}
+      ${chart('Aerobic sessions','Aerobic_Sessions','sessions')}
+      ${ewpLine()}
+      ${chart('Support work','Support_Occurrences','occurrences')}
+    </div>
+    <div class="notice">Historical EWP is estimated from legacy reps/sets and assumed loads; exact set-level load data begins Aug 2026. Set equivalents before then assume about three sets per strength occurrence. These totals describe exposure, not like-for-like capability.</div>`;
+}
+
+function renderExercises(){
+  const items=(DATA.exercises||[]).map((x,i)=>({x,i}));
+
+  function one(item){
+    const x=item.x, i=item.i;
+    const c=x.changePct==null?'neutral':deltaClass(x.changePct);
+    const dt=x.changePct==null?'not enough prior sessions':(x.changePct>=0?'+':'')+fmt(x.changePct,1)+'%';
+    const sessions=(x.sessions||[]).map(s=>`<div class="sess"><span>${esc(s.date)}</span><span>${esc(s.sets)}</span><span>${fmt(s.ewp,1)} EWP</span></div>`).join('');
+    return `<div class="ex" onclick="toggleSessions(${i})">
+      <div class="exhead"><div class="exname">${esc(x.name)}</div><div class="delta ${c}">${dt}</div></div>
+      <div class="sets">Latest ${esc(x.latest.date)} · ${esc(x.latest.sets)}</div>
+      <div class="exmetrics">
+        <div class="exm"><b>${fmt(x.latest.ewp,1)}</b><span>latest EWP</span></div>
+        <div class="exm"><b>${fmt(x.recent4Avg,1)}</b><span>recent-4 avg</span></div>
+        <div class="exm"><b>${fmt(x.prior4Avg,1)}</b><span>prior-4 avg</span></div>
+      </div>
+      <div class="exvolume">Latest volume ${fmt(x.latest.volume,0)} lb × reps · ${fmt(x.sessionCount,0)} recorded sessions</div>
+      <div class="sessionlist" id="sessions-${i}">${sessions}</div>
+    </div>`;
+  }
+
+  const upper=items.filter(z=>z.x.split==='Upper').sort((a,b)=>a.x.order-b.x.order).map(one).join('');
+  const lower=items.filter(z=>z.x.split==='Leg').sort((a,b)=>a.x.order-b.x.order).map(one).join('');
+  const other=items.filter(z=>!['Upper','Leg'].includes(z.x.split)).map(one).join('');
+
+  return pageHeader()+`<div class="sub">Current set-era comparison: recent 4 sessions vs preceding 4. Tap an exercise for recent sessions.</div>
+  <div class="section">Current machine exercises</div>
+  <div class="splitgrid">
+    <div class="splitcol"><div class="splithead">Upper — workout order</div>${upper}</div>
+    <div class="splitcol"><div class="splithead">Lower — workout order</div>${lower}</div>
+  </div>
+  ${other?`<div class="section">Other</div><div class="splitcol">${other}</div>`:''}
+  <div class="notice">Upper and lower are shown in the actual routine order from Routine_Expectations—not alphabetically. This is intentionally a short set-era comparison, not yet the eventual ~3-month strength trend.</div>`;
+}
+
+function renderHistory(){
+  const annual=(DATA.annual||[]).filter(x=>Number(x.Year)>=2017);
+  const ar=annual.map(x=>{
+    const days=Number(x.Exercise_Days||0),occ=Number(x.Known_Exercise_Occurrences||0);
+    const ratio=days?occ/days:0;
+    const y=Number(x.Year)===2026?'2026 YTD':x.Year;
+    const walk=Number(x.Known_Walking_Miles||0);
+    const wc=Number(x.Walking_Months_With_Data||0);
+    return `<tr><td>${esc(y)}</td><td>${fmt(days,0)}</td><td>${fmt(occ,0)}</td><td>${fmt(ratio,2)}</td><td>${fmt(x.Strength_Occurrences,0)}</td><td>${x.Set_Equivalent==null?'—':fmt(x.Set_Equivalent,0)+(x.Set_Basis==='measured'?'':' ~')}</td><td>${fmt(x.Support_Occurrences,0)}</td><td>${fmt(x.Aerobic_Sessions,0)}</td><td>${walk?fmt(walk,1):'—'}</td><td>${wc}/12${Number(x.Year)===2026?' YTD':''}</td></tr>`;
+  }).join('');
+
+  const mr=(DATA.monthly||[]).map(x=>{
+    const label=monthLabel(x.Month);
+    return `<tr><td>${esc(label)}</td><td>${fmt(x.Exercise_Days,0)}</td><td>${fmt(x.Known_Exercise_Occurrences,0)}</td><td>${fmt(x.Strength_Occurrences,0)}</td><td>${x.Set_Equivalent==null?'—':fmt(x.Set_Equivalent,0)+(x.Set_Basis==='measured'?'':' ~')}</td><td>${fmt(x.Support_Occurrences,0)}</td><td>${fmt(x.Aerobic_Sessions,0)}</td><td>${fmt(x.Walking_Miles,1)}</td></tr>`;
+  }).join('');
+
+  const oldRoutine=annual.filter(x=>Number(x.Year)>=2017 && Number(x.Year)<=2025).map(x=>`<tr>
+    <td>${esc(x.Year)}</td><td>${fmt(x.Pushup_Reps,0)}</td><td>${fmt(x.Bench_Reps,0)}</td><td>${fmt(x.Curl_Reps,0)}</td>
+    <td>${fmt(x.SideRaise_Reps,0)}</td><td>${fmt(x.Dip_Reps,0)}</td><td>${fmt(x.Plank_Sessions,0)}</td>
+    <td>${fmt(x.Balance_Sessions,0)}</td><td>${fmt(x.Stretch_Sessions,0)}</td>
+  </tr>`).join('');
+
+  const gaps=(DATA.gaps||[]).slice().sort((a,b)=>Number(b.Gap_Days||0)-Number(a.Gap_Days||0)).slice(0,15).map(x=>`<tr>
+    <td>${esc(x.Gap_Start)}</td><td>${esc(x.Gap_End)}</td><td>${fmt(x.Gap_Days,0)}</td><td>${esc(x.Severity)}</td>
+  </tr>`).join('');
+
+  return pageHeader()+`
+  <div class="sub">Historical summaries use only the detail actually recoverable for each era.</div>
+  <div class="section">Yearly pattern</div>
+  <div class="tablebox"><table><thead><tr><th>Year</th><th>Exercise days</th><th>Occurrences</th><th>Occ / day</th><th>Strength</th><th>Sets / approx.*</th><th>Support</th><th>Aerobic</th><th>Walking mi</th><th>Walk coverage</th></tr></thead><tbody>${ar}</tbody></table></div>
+  <div class="notice">LA Fitness treadmill-session occurrences are now reconstructed from calendar titles: 48 sessions in 2023 and 40 in 2024. Duration, distance, HR, calories and EWP remain unknown unless independently recorded.</div>
+  <details><summary>Old-routine exercise detail by year</summary><div class="tablebox"><table><thead><tr><th>Year</th><th>Push-ups</th><th>Bench reps</th><th>Curl reps</th><th>Side-raise reps</th><th>Dips</th><th>Plank sessions</th><th>Balance</th><th>Stretch</th></tr></thead><tbody>${oldRoutine}</tbody></table></div></details>
+  <details><summary>Longest exercise gaps (5+ full days)</summary><div class="tablebox"><table><thead><tr><th>Gap start</th><th>Gap end</th><th>Days</th><th>Severity</th></tr></thead><tbody>${gaps}</tbody></table></div></details>
+  <div class="notice">*Historical set equivalents are approximated from strength occurrences at about three sets per occurrence; modern recorded sets are exact. Historical EWP is estimated from legacy reps/sets and assumed loads; exact set-level load data begins Aug 2026. Unknown values remain blank.</div>
+  <div class="section">Recent months</div>
+  <div class="tablebox"><table><thead><tr><th>Month</th><th>Exercise days</th><th>Occurrences</th><th>Strength</th><th>Sets / approx.*</th><th>Support</th><th>Aerobic</th><th>Walking mi</th></tr></thead><tbody>${mr}</tbody></table></div>`;
+}
+
+function renderData(){
+  const s=DATA.stats||{}, all=DATA.issues||[];
+  const partial=(DATA.partialWorkouts||[]).slice().reverse();
+  const isMinor=x=>{
+    if(String(x.Issue_Type)!=='SOURCE_EWP_MISMATCH')return false;
+    const m=String(x.Details||'').match(/source EWP is ([0-9.]+), but recorded sets calculate to ([0-9.]+)/i);
+    return !!m && Math.abs(Number(m[1])-Number(m[2]))<=3;
+  };
+  const minor=all.filter(isMinor), important=all.filter(x=>!isMinor(x)).sort((a,b)=>
+    ({High:0,Medium:1,Low:2}[a.Severity]??3)-({High:0,Medium:1,Low:2}[b.Severity]??3));
+  const issue=x=>`<div class="auditrow"><b><span class="sev ${esc(x.Severity)}">${esc(x.Severity)}</span> · ${esc(x.Issue_Type)} · ${esc(x.Issue_ID)}</b>${esc(x.Details)}</div>`;
+  const cov=(DATA.coverage||[]).map(x=>`${esc(x.Start)}–${esc(x.End)}: ${esc(x.Detail_Level)} (${esc(x.Status)})`).join('<br>');
+  const defs=(DATA.definitions||[]).map(x=>`<b>${esc(x.Metric)}:</b> ${esc(x.Definition)}${x.Caution?'<br><span class="sub">'+esc(x.Caution)+'</span>':''}`).join('<br><br>');
+  return pageHeader()+`<div class="sub">Audit and provenance · raw alternatives remain in the source database.</div>
+  <div class="kpis">
+    ${kpi(fmt(s.rawRows,0),'legacy raw records')}
+    ${kpi(fmt(s.monthlyRows,0),'monthly summaries')}
+    ${kpi(fmt(s.openIssues,0),'open source issues')}
+    ${kpi(fmt(important.length,0),'review items')}
+  </div>
+  <div class="section">Review first</div>
+  ${partial.length?`<div class="tablebox">${partial.map(w=>`<div class="auditrow"><b>Partial workout · ${esc(w.Date)} · ${esc(w.Split)}</b>${fmt(w.Recorded_Sets,0)}/${fmt(w.Expected_Sets,0)} sets · ${esc(w.Notes||'')}</div>`).join('')}</div>`:''}
+  <div class="tablebox">${important.map(issue).join('')||'<div class="notice">No significant review items.</div>'}</div>
+  <details><summary>${minor.length} minor EWP source differences · set-derived value used</summary><div class="notice">These differences are at most 3 EWP. For exact exercise comparisons, the recorded sets and established divisor are canonical. Original source values and issue records remain below and in Data_Issues; aggregate legacy summaries retain their own documented source basis.</div><div class="tablebox">${minor.map(issue).join('')}</div></details>
+  <details><summary>Coverage by era</summary><div class="notice">${cov}</div></details>
+  <details><summary>Metric definitions</summary><div class="notice">${defs}</div></details>`;
+}
+
+function card(label,value,unit,delta,cls,detail){return `<div class="card"><div class="label">${label}</div><div class="value">${value} <span class="unit">${unit}</span></div><div class="delta ${cls}">${delta}</div><div class="detail">${detail}</div></div>`}
+function mini(v,l){return `<div class="mini"><b>${v}</b><span>${l}</span></div>`}
+function kpi(v,l){return `<div class="kpi"><b>${v}</b><span>${l}</span></div>`}
+function monthLabel(v){const s=String(v||'');const m=s.match(/^(\d{4})-(\d{2})$/);if(!m)return s;const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return names[Number(m[2])-1]+' '+m[1];}
+function toggleSessions(i){document.getElementById('sessions-'+i)?.classList.toggle('open')}
+function setDashSplit(v){DASH_SPLIT=v;const p=document.getElementById('dash');if(p){p.innerHTML=renderDash();const d=document.getElementById('exerciseDetail');if(d)d.open=true}}
+function showTab(id,b){document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));document.getElementById(id)?.classList.add('active');document.querySelectorAll('.tabbar button').forEach(x=>x.classList.remove('active'));b.classList.add('active');loadTab(id);scrollTo(0,0)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body>
+</html>
