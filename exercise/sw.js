@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='exercise-shell-v9.15-2';
-const FILES=['./','./index.html','./connection.js?v=9.15.1','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='exercise-shell-v9.15-3';
+const FILES=['./','./index.html','./connection.js?v=9.15.2','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES))));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('exercise-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
