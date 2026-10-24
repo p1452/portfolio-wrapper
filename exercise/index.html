@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon-192.png">
-<script src="./connection.js?v=9.15.2"></script>
+<script src="./connection.js?v=9.15.3"></script>
   <meta charset="utf-8">
   <style>
     :root{
@@ -191,7 +191,7 @@ window.addEventListener('unhandledrejection',function(e){
   if(c){c.innerHTML='<div style="margin:16px;padding:14px;background:#181b20;color:#ff8f86;border:1px solid #343941;border-radius:12px;font:14px system-ui"><b>Promise error</b><br>'+String((e.reason&&e.reason.message)||e.reason||'Unknown error')+'</div>';}
 });
 </script>
-<div id="dataStatus" role="status" style="padding:6px 12px;font:12px system-ui;color:#112546;background:#fff3d7">Dashboard: connecting to live source…</div>
+<div id="dataStatus" role="status" hidden style="position:fixed;right:8px;bottom:calc(65px + env(safe-area-inset-bottom));max-width:calc(100% - 16px);z-index:30;padding:6px 10px;font:12px system-ui;color:#112546;background:#fff3d7;border-radius:6px"></div>
 <div class="app">
   <div id="content"></div>
 </div>
@@ -225,7 +225,7 @@ function loadingPane(label,defer=false){
 const DASH_CACHE_KEY='exercise-dashboard:snapshot:v1';
 let DASH_SNAPSHOT=null;
 function validDash(d){return !!(d && Array.isArray(d.recent) && Array.isArray(d.activityDays) && d.generatedAt && d.monthlyGoal && d.activityDays.every(day=>/^\d{4}-\d{2}-\d{2}$/.test(day.date)))}
-function dashStatus(message){document.getElementById('dataStatus').textContent='Dashboard: '+message}
+function dashStatus(message){window.exerciseStatus(message)}
 function savedStatus(message){dashStatus('Saved snapshot · data generated '+(DASH_SNAPSHOT?.data.generatedAt||'unknown')+' · '+message)}
 function restoreDash(){
   try {
