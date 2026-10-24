@@ -26,7 +26,8 @@ function runner(success=()=>{},failure=()=>{}){
 }
 window.google={script:{get run(){return runner()}}};
 document.addEventListener('DOMContentLoaded',()=>{
-  const frame=document.createElement('iframe');frame.title='Authenticated Exercise connection';frame.hidden=true;
+  const frame=document.createElement('iframe');frame.title='Authenticated Exercise connection';frame.tabIndex=-1;frame.setAttribute('aria-hidden','true');frame.style.cssText='position:absolute;left:-10000px;width:1px;height:1px;border:0';
+  if(new URLSearchParams(location.search).has('connection-check'))frame.style.cssText='width:100%;height:360px;border:0';
   frame.src=EXERCISE_URL+'?mode=bridge&channel='+channel;document.body.appendChild(frame);
   const help=document.createElement('div');help.style.cssText='padding:2px 12px;font:12px system-ui';
   const link=document.createElement('a');link.href=EXERCISE_URL;link.target='_blank';link.rel='noopener';link.textContent='Google sign-in / original app';help.appendChild(link);document.getElementById('dataStatus').after(help);
